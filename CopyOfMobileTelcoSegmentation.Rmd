@@ -4,8 +4,9 @@ author: "Francisco Roque"
 date: "27 de janeiro de 2017"
 output: html_document
 ---
+<<<<<<< HEAD
 
-#Telecom Buisness
+#Telecom Buisness e
 <br>
 We are studying a database providing telecommunication consumption data.
 The company is providing services in Ghana, and our focus will be exclusively on customers who buy prepaid packages (same as Starhub prepaid packages)
@@ -18,6 +19,11 @@ The company is providing services in Ghana, and our focus will be exclusively on
 What are our customer segment based on historical data/voice usage? And how shall we serve them better with our services?
 Our Goal : define the customer segment and characterize them with their service usage.
 
+=======
+fff
+1)	The business questions
+blablablblblbalblablbalbzkjdabkd
+>>>>>>> 5528cf4e581e50936547b0eda3517be27d3cf85d
 
 ###2)	The process
 a.	List and description of steps below)
