@@ -25,7 +25,7 @@ a.	List and description of steps below)
 dasakdjhsajdhsajdhsd
 akdsjhsjadh
 
-3)	The data
+###3)	The data
 a.	Load the data
 
 
@@ -34,7 +34,7 @@ b.	Describe the data (highlevel description of contents, # of rows, # of columns
 
 
 
-4)	PART 1: Factor/Component selection
+###4)	PART 1: Factor/Component selection
 
 a.	Step 1: Descriptive statistics of the data
 
@@ -66,7 +66,7 @@ f.	Step 6: Consolidate all the data into only the factors/components
 
 
 
-5)	PART 2: Segmentation
+###5)	PART 2: Segmentation
 
 a.	Step 1: Visualize the pair-wise distances and decide distance metric to define how different customers must be to be considered different
 
