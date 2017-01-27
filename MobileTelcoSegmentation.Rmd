@@ -1,7 +1,6 @@
 ---
 title: "MobileTelcoSegmentation"
-author: "Francisco Roque"
-date: "27 de janeiro de 2017"
+author: "Group Great"
 output:
   html_document:
 
