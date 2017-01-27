@@ -2,8 +2,20 @@
 title: "MobileTelcoSegmentation"
 author: "Francisco Roque"
 date: "27 de janeiro de 2017"
-output: html_document
+output: 
+html_document:
+    css: /AnalyticsStyles/default.css
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    includes:
+      in_header: /AnalyticsStyles/default.sty
+always_allow_html: yes
 ---
+
 <<<<<<< HEAD
 
 #Telecom Buisness e
