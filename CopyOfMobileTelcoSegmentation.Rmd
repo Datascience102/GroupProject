@@ -4,7 +4,7 @@ author: "Francisco Roque"
 date: "27 de janeiro de 2017"
 output: html_document
 ---
-
+fff
 1)	The business questions
 blablablblblbalblablbalbzkjdabkd
 
