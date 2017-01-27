@@ -5,10 +5,21 @@ date: "27 de janeiro de 2017"
 output: html_document
 ---
 
-1)	The business questions
-blablablblblbalblablbalbzkjdabkd
+#Telecom Buisness
+<br>
+We are studying a database providing telecommunication consumption data.
+The company is providing services in Ghana, and our focus will be exclusively on customers who buy prepaid packages (same as Starhub prepaid packages)
 
-2)	The process
+##Objectives of the project : Understand Customers consumptions habit in order for the company to offer the right packages to the right customer segment.
+
+
+###1)	The business questions :
+
+What are our customer segment based on historical data/voice usage? And how shall we serve them better with our services?
+Our Goal : define the customer segment and characterize them with their service usage.
+
+
+###2)	The process
 a.	List and description of steps below)
 
 dasakdjhsajdhsajdhsd
