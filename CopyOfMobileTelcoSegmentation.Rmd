@@ -11,7 +11,8 @@ output: html_document
 2)	The process
 a.	List and description of steps below)
 
-
+dasakdjhsajdhsajdhsd
+akdsjhsjadh
 
 3)	The data
 a.	Load the data
