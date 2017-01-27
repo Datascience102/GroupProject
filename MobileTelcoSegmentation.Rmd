@@ -1,5 +1,5 @@
 ---
-title: "MobileTelcoSegmentation"
+title: "Mobile Telecom Segmentation"
 author: "Group Great"
 output:
   html_document:
@@ -10,92 +10,92 @@ output:
       collapsed: no
       smooth_scroll: yes
 ---
-<<<<<<< HEAD
 
-#Telecom Buisness
+
+#Context of the project
+We are using a database with mobile telecommunication consumption data.
+
+The data belongs to a mobile telecom company that operates in Ghana, and our focus will be exclusively on customers who buy prepaid packages (similar to Starhub prepaid packages)
+
+The company uses an old customer segmentation to design service packages (voice, roaming, data, etc) and to target sales initiatives. However, there is the perception that the segmentation is outdated and not working anymore as it should.
 <br>
-We are studying a database providing telecommunication consumption data.
 
-The company is providing services in Ghana, and our focus will be exclusively on customers who buy prepaid packages (same as Starhub prepaid packages)
+#1)	The business questions:
+The objective is to create a new segmentation based on data of customer usage of the different services, so the company can better offer and design the right packages to the right customer segments.
 
-##Objectives of the project : 
-###Understand Customers consumptions habit in order for the company to offer the right packages to the right customer segment.
+1) What are the main customer segments based on historical usage of the different services (voice, data, etc)? 
 
-
-###1)	The business questions :
-
-What are our customer segment based on historical data/voice usage? And how shall we serve them better with our services?
-Our Goal : define the customer segment and characterize them with their service usage.
+2) And how shall we serve them better with our services?
 
 
-###2)	The process
-####a.	List and description of steps below)
-
-dasakdjhsajdhsajdhsd
-akdsjhsjadh
-
-###3)	The data
-####a.	Load the data
+#2)	The process
+List and description of steps below)
 
 
 
-####b.	Describe the data (highlevel description of contents, # of rows, # of columns, list the columns and its meaning, show a sample of the data)
+#3)	The data
+##a.	Load the data
 
 
 
-###4)	PART 1: Factor/Component selection
-
-####a.	Step 1: Descriptive statistics of the data
-
+##b.	Describe the data 
+(highlevel description of contents, # of rows, # of columns, list the columns and its meaning, show a sample of the data)
 
 
-####b.	Step 2: Some visual charts of the data that are useful to understand the data (e.g. histogram of gigabytes used per client)
+
+#4)	PART 1: Factor/Component selection
+
+##Step 1: Descriptive statistics of the data
+
+
+
+##Step 2: Visualize the data
+Some visual charts of the data that are useful to understand the data (e.g. histogram of gigabytes used per client)
 
 
 
 
-####c.	Step 3: Check correlations (this is another step to just get to know better the data)
+##Step 3: Check correlations
+(this is another step to just get to know better the data)
 
 
 
-####d.	Step 4: Choose method to select number of factors/components
+##Step 4: Choose method to select number of factors/components
 
-#####i.	This part will imply going through several iterations of playing with the methods and discussing the results until it all makes sense
-
-
-
-
-####e.	Step 5: Name and describe the final selected factors/components
+i.	This part will imply going through several iterations of playing with the methods and discussing the results until it all makes sense
 
 
 
 
-####f.	Step 6: Consolidate all the data into only the factors/components
+##Step 5: Name and describe the final selected factors/components
 
 
 
 
-###5)	PART 2: Segmentation
-
-####a.	Step 1: Visualize the pair-wise distances and decide distance metric to define how different customers must be to be considered different
+##Step 6: Consolidate all the data into only the factors/components
 
 
 
 
-####b.	Step 2: Segmentation and Robustness Analysis
+#5)	PART 2: Segmentation
 
-#####i.	Segmentation - Play around with the different segmentation methods until we get a result that makes sense
+##Step 1: Decide on pair-wise distance metric
+Visualize the pair-wise distances and decide distance metric to define how different customers must be to be considered different
+
+
+
+
+##Step 2: Segmentation and Robustness Analysis
+
+###i.	Segmentation/Robustness Analysis
+Play around with the different segmentation methods until we get a result that makes sense
 <br>
-<br>
-<br>
-<br>
-<br>
-#####ii.	Robustness Analysis - Show the different method used, its results and why it didn’t make sense
+Show the different method used, its results and why it didn’t make sense
 
 
 
 
 
 
-####c.	Step 3: Profile and interpret the above defines segments
-#####i.	This is the final output
+#c.	Step 3: Profile and interpret the above defined segments
+This is the final output
