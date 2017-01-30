@@ -3,14 +3,27 @@ title: "Mobile Telecom Segmentation"
 author: "Group Great"
 output:
   html_document:
-
+    css: ../Big Data Analytics/AnalyticsStyles/default.css
     theme: paper
     toc: yes
     toc_float:
       collapsed: no
       smooth_scroll: yes
+  pdf_document:
+    includes:
+      in_header: ../Big Data Analytics/AnalyticsStyles/default.sty
+always_allow_html: yes
 ---
 
+```{r setuplibraries, echo=FALSE, message=FALSE}
+suppressWarnings(source("Library/library.R"))
+source("Library/heatmapOutput.R")
+# Package options
+suppressWarnings(ggthemr('fresh'))  # ggplot theme
+opts_knit$set(progress=FALSE, verbose=FALSE)
+opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.35, results="asis")
+options(knitr.kable.NA = '')
+```
 
 #Context of the project
 We are using a database with mobile telecommunication consumption data.
@@ -99,13 +112,13 @@ Start by some basic visual exploration of, say, a few data:
 
 ```{r}
 rownames(ProjectDataFactor) <- paste0("Obs.", sprintf("%02i", 1:nrow(ProjectDataFactor)))
-iprint.df(t(head(round(ProjectDataFactor, 2), max_data_report)))
+iprint.df(t(head(round(ProjectDataFactor, 2), max_data_report)), scale = TRUE)
 ```
 
 The data we use here have the following descriptive statistics: 
 
 ```{r}
-iprint.df(round(my_summary(ProjectDataFactor), 2))
+iprint.df(round(my_summary(ProjectDataFactor), 2), scale = FALSE)
 ```
 
 ## Step 3: Check Correlations
@@ -162,7 +175,7 @@ colnames(Variance_Explained_Table) <- c("Eigenvalue", "Pct of explained variance
 Let's look at the **variance explained** as well as the **eigenvalues** (see session readings):
 
 ```{r}
-iprint.df(round(Variance_Explained_Table, 2))
+iprint.df(round(Variance_Explained_Table, 2), scale = FALSE)
 ```
 
 ```{r}
