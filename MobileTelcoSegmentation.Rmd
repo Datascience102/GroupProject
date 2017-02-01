@@ -43,13 +43,13 @@ The objective is to create a new segmentation based on data of customer usage of
  
  
  
-#3)         The data
+#3)     The data
  
 ##3.1)   Treat and load the data
  
 ```{r setupdata1E, echo=TRUE, tidy=TRUE}
 # Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. Do not add .csv at the end, make sure the data are numeric.
-BDASmallTableClean = "Library/BDASmallTableClean.csv"
+BDASmallTableClean = "Library/BDASmallTableNew.csv"
  
 #>>>>>>> bfff9c1f85926b4164661820aa734f6312e97bf8 (WHAT IS THIS??)
  
