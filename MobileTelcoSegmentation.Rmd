@@ -15,7 +15,7 @@ output:
 always_allow_html: yes
 ---
  
-```{r setuplibraries, echo=FALSE, message=FALSE}
+```{r setuplibraries, echo=TRUE, message=FALSE}
 suppressWarnings(source("Library/library.R"))
 source("Library/heatmapOutput.R")
 source("Library/MartrixOperations.R")
@@ -222,41 +222,63 @@ iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
  
 <hr>\clearpage
  
- 
-##Step 2: Visualize the data
-Some visual charts of the data that are useful to understand the data (e.g. histogram of gigabytes used per client)
- 
- 
- 
- 
-##Step 3: Check correlations
-(this is another step to just get to know better the data)
- 
- 
- 
-##Step 4: Choose method to select number of factors/components
- 
-i.             This part will imply going through several iterations of playing with the methods and discussing the results until it all makes sense
- 
- 
- 
- 
-##Step 5: Name and describe the final selected factors/components
- 
- 
- 
- 
-##Step 6: Consolidate all the data into only the factors/components
- 
- 
- 
- 
+
 #5)         PART 2: Segmentation
- 
+
+```{r setupcluster, echo=TRUE, tidy=TRUE}
+# Please ENTER then original raw attributes to use for the segmentation (the "segmentation attributes")
+# Please use numbers, not column names, e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
+segmentation_attributes_used = c(28,25,27,14,20,8,3,12,13,5,9,11,2,30,24) #c(10,19,5,12,3) 
+
+# Please ENTER then original raw attributes to use for the profiling of the segments (the "profiling attributes")
+# Please use numbers, not column names, e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
+profile_attributes_used = c(2:82) 
+
+# Please ENTER the number of clusters to eventually use for this report
+numb_clusters_used = 7 # for boats possibly use 5, for Mall_Visits use 3
+
+# Please enter the method to use for the segmentation:
+profile_with = "hclust" #  "hclust" or "kmeans"
+
+# Please ENTER the distance metric eventually used for the clustering in case of hierarchical clustering 
+# (e.g. "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski" - see help(dist)). 
+# DEFAULT is "euclidean"
+distance_used = "euclidean"
+
+# Please ENTER the hierarchical clustering method to use (options are:
+# "ward", "single", "complete", "average", "mcquitty", "median" or "centroid").
+# DEFAULT is "ward"
+hclust_method = "ward.D"
+
+# Please ENTER the kmeans clustering method to use (options are:
+# "Hartigan-Wong", "Lloyd", "Forgy", "MacQueen").
+# DEFAULT is "Lloyd"
+kmeans_method = "Lloyd"
+
+```
+
+
 ##Step 1: Decide on pair-wise distance metric
-Visualize the pair-wise distances and decide distance metric to define how different customers must be to be considered different
+
+We need to define a distance metric that measures how different people (observations in general) are from each other. This can be an important choice. Here are the differences between the observations using the distance metric we selected:
+
+```{r}
+euclidean_pairwise <- as.matrix(dist(head(NEW_ProjectData, max_data_report), method="euclidean"))
+euclidean_pairwise <- euclidean_pairwise*lower.tri(euclidean_pairwise) + euclidean_pairwise*diag(euclidean_pairwise) + 10e10*upper.tri(euclidean_pairwise)
+euclidean_pairwise[euclidean_pairwise==10e10] <- NA
+rownames(euclidean_pairwise) <- colnames(euclidean_pairwise) <- sprintf("Obs.%02d", 1:max_data_report)
+
+iprint.df(round(euclidean_pairwise))
+```
  
- 
+We can see the histogram of, say, the first 5 variables (can you change the code chunk in the raw .Rmd file to see other variables?)
+
+```{r}
+variables_to_plot = 1:5
+do.call(iplot.grid, lapply(variables_to_plot, function(n){
+  iplot.hist(NEW_ProjectData[, n], breaks=5, xlab = paste("Variable", n))
+}))
+```
  
  
 ##Step 2: Segmentation and Robustness Analysis
@@ -265,11 +287,48 @@ Visualize the pair-wise distances and decide distance metric to define how diffe
 Play around with the different segmentation methods until we get a result that makes sense
 <br>
 Show the different method used, its results and why it didn’t make sense
+
+We need to select the clustering method to use, as well as the number of cluster. It may be useful to see the dendrogram from Hierarchical Clustering, to have a quick idea of how the data may be segmented and how many segments there may be. Here is the dendrogram for our data:
+
+```{r}
+Hierarchical_Cluster_distances <- dist(NEW_ProjectData, method=distance_used)
+Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=hclust_method)
+# Display dendogram
+iplot.dendrogram(Hierarchical_Cluster)
+# TODO: Draw dendogram with red borders around the 3 clusters
+# rect.hclust(Hierarchical_Cluster, k=numb_clusters_used, border="red") 
+``` 
  
+We can also plot the "distances" traveled before we need to merge any of the lower and smaller in size clusters into larger ones - the heights of the tree branches that link the clusters as we traverse the tree from its leaves to its root. If we have n observations, this plot has n-1 numbers, we see the first 20 here. 
+```{r}
+num <- nrow(ProjectData) - 1
+df1 <- cbind(as.data.frame(Hierarchical_Cluster$height[length(Hierarchical_Cluster$height):1]), c(1:num))
+colnames(df1) <- c("distances","index")
+iplot.df(melt(head(df1, 20), id="index"), xlab="Number of Components")
+``` 
  
- 
- 
- 
+Here is the segment membership of the first `r max_data_report` respondents if we use hierarchical clustering:
+
+```{r}
+cluster_memberships_hclust <- as.vector(cutree(Hierarchical_Cluster, k=numb_clusters_used)) # cut tree into 3 clusters
+cluster_ids_hclust=unique(cluster_memberships_hclust)
+
+ProjectData_with_hclust_membership <- cbind(1:length(cluster_memberships_hclust),cluster_memberships_hclust)
+colnames(ProjectData_with_hclust_membership)<-c("Observation Number","Cluster_Membership")
+
+iprint.df(round(head(ProjectData_with_hclust_membership, max_data_report), 2))
+```
+
+while this is the segment membership if we use k-means:
+
+```{r}
+kmeans_clusters <- kmeans(NEW_ProjectData,centers= numb_clusters_used, iter.max=2000, algorithm=kmeans_method)
+
+ProjectData_with_kmeans_membership <- cbind(1:length(kmeans_clusters$cluster),kmeans_clusters$cluster)
+colnames(ProjectData_with_kmeans_membership)<-c("Observation Number","Cluster_Membership")
+
+iprint.df(round(head(ProjectData_with_kmeans_membership, max_data_report), 2))
+```
  
 #c.          Step 3: Profile and interpret the above defined segments
 This is the final output
