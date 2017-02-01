@@ -3,7 +3,7 @@ title: "Mobile Telecom Segmentation"
 author: "Group Great"
 output:
   html_document:
-    css: ../Big Data Analytics/AnalyticsStyles/default.css
+    css: AnalyticsStyles/default.css
     theme: paper
     toc: yes
     toc_float:
@@ -11,203 +11,168 @@ output:
       smooth_scroll: yes
   pdf_document:
     includes:
-      in_header: ../Big Data Analytics/AnalyticsStyles/default.sty
+      in_header: AnalyticsStyles/default.sty
 always_allow_html: yes
 ---
-
+ 
 ```{r setuplibraries, echo=FALSE, message=FALSE}
 suppressWarnings(source("Library/library.R"))
 source("Library/heatmapOutput.R")
+source("Library/MartrixOperations.R")
+source("Library/allPublicLibraries.R")
 # Package options
 suppressWarnings(ggthemr('fresh'))  # ggplot theme
 opts_knit$set(progress=FALSE, verbose=FALSE)
 opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.35, results="asis")
 options(knitr.kable.NA = '')
 ```
-
-#Context of the project
+ 
+#1) Context of the project
 We are using a database with mobile telecommunication consumption data.
-
+ 
 The data belongs to a mobile telecom company that operates in Ghana, and our focus will be exclusively on customers who buy prepaid packages (similar to Starhub prepaid packages)
-
+ 
 The company uses an old customer segmentation to design service packages (voice, roaming, data, etc) and to target sales initiatives. However, there is the perception that the segmentation is outdated and not working anymore as it should.
 <br>
-
-#1)	The business questions:
+ 
+#2)         The business questions:
 The objective is to create a new segmentation based on data of customer usage of the different services, so the company can better offer and design the right packages to the right customer segments.
-
-1) What are the main customer segments based on historical usage of the different services (voice, data, etc)? 
-
-2) And how shall we serve them better with our services?
-
-
-#2)	The process
-List and description of steps below)
-
-
-
-#3)	The data
-##a.	Load the data
+ 
+1) What are the main customer segments based on historical usage of the different services (voice, data, etc)?
+ 
+ 
+ 
+ 
+#3)         The data
+ 
+##3.1)   Treat and load the data
+ 
 ```{r setupdata1E, echo=TRUE, tidy=TRUE}
 # Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. Do not add .csv at the end, make sure the data are numeric.
-BDASmallTableClean <- "Library/BDASmallTableClean.csv"
-
+BDASmallTableClean = "Library/BDASmallTableClean.csv"
+ 
+#>>>>>>> bfff9c1f85926b4164661820aa734f6312e97bf8 (WHAT IS THIS??)
+ 
 # Please enter the minimum number below which you would like not to print - this makes the readability of the tables easier. Default values are either 10e6 (to print everything) or 0.5. Try both to see the difference.
 MIN_VALUE = 0.5
-
-# Please enter the maximum number of observations to show in the report and slides. 
+ 
+# Please enter the maximum number of observations to show in the report and slides.
 # DEFAULT is 10. If the number is large the report may be slow.
-max_data_report = 1000
+max_data_report = 40
 ```
-
+ 
 ```{r}
 ProjectData <- read.csv(BDASmallTableClean)
-ProjectData <- data.matrix(ProjectData) 
+ProjectData <- data.matrix(ProjectData)
 ProjectData_INITIAL <- ProjectData
-
+ 
 ```
-
-##b.	Describe the data 
+ 
+##3.2)   Describe the data
 (highlevel description of contents, # of rows, # of columns, list the columns and its meaning, show a sample of the data)
-
-
-
-#4)	PART 1: Factor/Component selection
-
-
-
-In this part we identify the underlying factors that  
-
+ 
+ 
+ 
+#4)         PART 1: Factor/Component selection
+ 
+ 
+ 
+In this part we identify the underlying factors that best capture the behaviours on the various variables.
+ 
 ```{r setupfactor, echo=TRUE, tidy=TRUE}
-# Please ENTER then original raw attributes to use. 
+# Please ENTER the original raw attributes to use.
 # Please use numbers, not column names, e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
-factor_attributes_used = c(2:30)
-
-# Please ENTER the selection criterions for the factors to use. 
+factor_attributes_used = c(3:ncol(ProjectData))
+ 
+# Please ENTER the selection criterions for the factors to use.
 # Choices: "eigenvalue", "variance", "manual"
 factor_selectionciterion = "manual"
-
-# Please ENTER the desired minumum variance explained 
-# (Only used in case "variance" is the factor selection criterion used). 
+ 
+# Please ENTER the desired minumum variance explained
+# (Only used in case "variance" is the factor selection criterion used).
 minimum_variance_explained = 65  # between 1 and 100
-
-# Please ENTER the number of factors to use 
+ 
+# Please ENTER the number of factors to use
 # (Only used in case "manual" is the factor selection criterion used).
 manual_numb_factors_used = 15
-
+ 
 # Please ENTER the rotation eventually used (e.g. "none", "varimax", "quatimax", "promax", "oblimin", "simplimax", and "cluster" - see help(principal)). Default is "varimax"
 rotation_used = "varimax"
-
+ 
 ```
-
+ 
 ```{r}
 factor_attributes_used <- intersect(factor_attributes_used, 1:ncol(ProjectData))
 ProjectDataFactor <- ProjectData[,factor_attributes_used]
 ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
 ```
-
-## Steps 1-2: Check the Data 
-
+ 
+## Steps 1-2: Check the Data
+ 
 Start by some basic visual exploration of, say, a few data:
-
+ 
 ```{r}
 rownames(ProjectDataFactor) <- paste0("Obs.", sprintf("%02i", 1:nrow(ProjectDataFactor)))
 iprint.df(t(head(round(ProjectDataFactor, 2), max_data_report)), scale = TRUE)
 ```
-
-The data we use here have the following descriptive statistics: 
-
+ 
+The data we use here have the following descriptive statistics:
+ 
 ```{r}
 iprint.df(round(my_summary(ProjectDataFactor), 2), scale = FALSE)
 ```
-
+ 
 ## Step 3: Check Correlations
-
+ 
 This is the correlation matrix of the customer responses to the `r ncol(ProjectDataFactor)` attitude questions - which are the only questions that we will use for the segmentation (see the case):
-
+ 
 ```{r}
 thecor = round(cor(ProjectDataFactor),2)
 iprint.df(round(thecor,2), scale=TRUE)
 ```
-
-**Questions**
-
-1. Do you see any high correlations between the responses? Do they make sense? 
-2. What do these correlations imply?
-
-**Answers:**
-
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-
+ 
+ 
 ## Step 4: Choose number of factors
-
+ 
 Clearly the survey asked many redundant questions (can you think some reasons why?), so we may be able to actually "group" these 29 attitude questions into only a few "key factors". This not only will simplify the data, but will also greatly facilitate our understanding of the customers.
-
-To do so, we use methods called [Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis) and [factor analysis](https://en.wikipedia.org/wiki/Factor_analysis) as also discussed in the [Dimensionality Reduction readings](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Sessions23/FactorAnalysisReading.html). We can use two different R commands for this (they make slightly different information easily available as output): the command `principal` (check `help(principal)` from R package [psych](http://personality-project.org/r/psych/)), and the command `PCA` from R package [FactoMineR](http://factominer.free.fr) - there are more packages and commands for this, as these methods are very widely used.  
-
+ 
+To do so, we use methods called [Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis) and [factor analysis](https://en.wikipedia.org/wiki/Factor_analysis) as also discussed in the [Dimensionality Reduction readings](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Sessions23/FactorAnalysisReading.html). We can use two different R commands for this (they make slightly different information easily available as output): the command `principal` (check `help(principal)` from R package [psych](http://personality-project.org/r/psych/)), and the command `PCA` from R package [FactoMineR](http://factominer.free.fr) - there are more packages and commands for this, as these methods are very widely used. 
+ 
 ```{r}
-# Here is how the `principal` function is used 
+# Here is how the `principal` function is used
 UnRotated_Results<-principal(ProjectDataFactor, nfactors=ncol(ProjectDataFactor), rotate="none",score=TRUE)
 UnRotated_Factors<-round(UnRotated_Results$loadings,2)
 UnRotated_Factors<-as.data.frame(unclass(UnRotated_Factors))
 colnames(UnRotated_Factors)<-paste("Comp",1:ncol(UnRotated_Factors),sep="")
 ```
-
+ 
 ```{r}
-# Here is how we use the `PCA` function 
+# Here is how we use the `PCA` function
 Variance_Explained_Table_results<-PCA(ProjectDataFactor, graph=FALSE)
 Variance_Explained_Table<-Variance_Explained_Table_results$eig
 Variance_Explained_Table_copy<-Variance_Explained_Table
-
+ 
 rownames(Variance_Explained_Table) <- paste("Component", 1:nrow(Variance_Explained_Table), sep=" ")
 colnames(Variance_Explained_Table) <- c("Eigenvalue", "Pct of explained variance", "Cumulative pct of explained variance")
 ```
-
+ 
 Let's look at the **variance explained** as well as the **eigenvalues** (see session readings):
-
+ 
 ```{r}
 iprint.df(round(Variance_Explained_Table, 2), scale = FALSE)
 ```
-
+ 
 ```{r}
 eigenvalues  <- Variance_Explained_Table[, "Eigenvalue"]
 df           <- cbind(as.data.frame(eigenvalues), c(1:length(eigenvalues)), rep(1, length(eigenvalues)))
 colnames(df) <- c("eigenvalues", "components", "abline")
 iplot.df(melt(df, id="components"))
 ```
-
-**Questions:**
-
-1. Can you explain what this table and the plot are? What do they indicate? What can we learn from these?
-2. Why does the plot have this specific shape? Could the plotted line be increasing? 
-3. What characteristics of these results would we prefer to see? Why?
-
-**Answers**
-
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-
+ 
 ## Step 5: Interpret the factors
-
-Let's now see how the "top factors" look like. 
-
+ 
+Let's now see how the "top factors" look like.
+ 
 ```{r}
 if (factor_selectionciterion == "eigenvalue")
   factors_selected = sum(Variance_Explained_Table_copy[,1] >= 1)
@@ -216,131 +181,95 @@ if (factor_selectionciterion == "variance")
 if (factor_selectionciterion == "manual")
   factors_selected = manual_numb_factors_used
 ```
-
-To better visualize them, we will use what is called a "rotation". There are many rotations methods. In this case we selected the `r rotation_used` rotation. For our data, the `r factors_selected` selected factors look as follows after this rotation: 
-
+ 
+To better visualize them, we will use what is called a "rotation". There are many rotations methods. In this case we selected the `r rotation_used` rotation. For our data, the `r factors_selected` selected factors look as follows after this rotation:
+ 
 ```{r}
 Rotated_Results<-principal(ProjectDataFactor, nfactors=max(factors_selected), rotate=rotation_used,score=TRUE)
 Rotated_Factors<-round(Rotated_Results$loadings,2)
 Rotated_Factors<-as.data.frame(unclass(Rotated_Factors))
 colnames(Rotated_Factors)<-paste("Comp.",1:ncol(Rotated_Factors),sep="")
-
+ 
 sorted_rows <- sort(Rotated_Factors[,1], decreasing = TRUE, index.return = TRUE)$ix
 Rotated_Factors <- Rotated_Factors[sorted_rows,]
-
+ 
 iprint.df(Rotated_Factors, scale=TRUE)
 ```
-
+ 
 To better visualize and interpret the factors we often "suppress" loadings with small values, e.g. with absolute values smaller than 0.5. In this case our factors look as follows after suppressing the small numbers:
-
+ 
 ```{r}
 Rotated_Factors_thres <- Rotated_Factors
 Rotated_Factors_thres[abs(Rotated_Factors_thres) < MIN_VALUE]<-NA
 colnames(Rotated_Factors_thres)<- colnames(Rotated_Factors)
 rownames(Rotated_Factors_thres)<- rownames(Rotated_Factors)
-
+ 
 iprint.df(Rotated_Factors_thres, scale=TRUE)
 ```
-
-**Questions**
-
-1. What do the first couple of factors mean? Do they make business sense? 
-2. How many factors should we choose for this data/customer base? Please try a few and explain your final choice based on a) statistical arguments, b) on interpretation arguments, c) on business arguments (**you need to consider all three types of arguments**)
-3. How would you interpret the factors you selected?
-4. What lessons about data science do you learn when doing this analysis? Please comment. 
-
-**Answers**
-
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-
-## Step 6:  Save factor scores 
-
+ 
+ 
+## Step 6:  Save factor scores
+ 
 We can now either replace all initial variables used in this part with the factors scores or just select one of the initial variables for each of the selected factors in order to represent that factor. Here is how the factor scores  are for the first few respondents:
-
+ 
 ```{r}
 NEW_ProjectData <- round(Rotated_Results$scores[,1:factors_selected,drop=F],2)
 colnames(NEW_ProjectData)<-paste("DV (Factor)",1:ncol(NEW_ProjectData),sep=" ")
-
+ 
 iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
 ```
-
-**Questions**
-
-1. Can you describe some of the people using the new derived variables (factor scores)? 
-2. Which of the 29 initial variables would you select to represent each of the factors you selected?  
-
-**Answers**
-
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-
+ 
+ 
 <hr>\clearpage
-
-
+ 
+ 
 ##Step 2: Visualize the data
 Some visual charts of the data that are useful to understand the data (e.g. histogram of gigabytes used per client)
-
-
-
-
+ 
+ 
+ 
+ 
 ##Step 3: Check correlations
 (this is another step to just get to know better the data)
-
-
-
+ 
+ 
+ 
 ##Step 4: Choose method to select number of factors/components
-
-i.	This part will imply going through several iterations of playing with the methods and discussing the results until it all makes sense
-
-
-
-
+ 
+i.             This part will imply going through several iterations of playing with the methods and discussing the results until it all makes sense
+ 
+ 
+ 
+ 
 ##Step 5: Name and describe the final selected factors/components
-
-
-
-
+ 
+ 
+ 
+ 
 ##Step 6: Consolidate all the data into only the factors/components
-
-
-
-
-#5)	PART 2: Segmentation
-
+ 
+ 
+ 
+ 
+#5)         PART 2: Segmentation
+ 
 ##Step 1: Decide on pair-wise distance metric
 Visualize the pair-wise distances and decide distance metric to define how different customers must be to be considered different
-
-
-
-
+ 
+ 
+ 
+ 
 ##Step 2: Segmentation and Robustness Analysis
-
-###i.	Segmentation/Robustness Analysis
+ 
+###i.     Segmentation/Robustness Analysis
 Play around with the different segmentation methods until we get a result that makes sense
 <br>
 Show the different method used, its results and why it didn’t make sense
-
-
-
-
-
-
-#c.	Step 3: Profile and interpret the above defined segments
+ 
+ 
+ 
+ 
+ 
+ 
+#c.          Step 3: Profile and interpret the above defined segments
 This is the final output
