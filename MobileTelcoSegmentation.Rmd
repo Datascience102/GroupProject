@@ -86,15 +86,15 @@ factor_attributes_used = c(3:ncol(ProjectData))
  
 # Please ENTER the selection criterions for the factors to use.
 # Choices: "eigenvalue", "variance", "manual"
-factor_selectionciterion = "manual"
+factor_selectionciterion = "eigenvalue"
  
 # Please ENTER the desired minumum variance explained
 # (Only used in case "variance" is the factor selection criterion used).
-minimum_variance_explained = 65  # between 1 and 100
+minimum_variance_explained = 80  # between 1 and 100
  
 # Please ENTER the number of factors to use
 # (Only used in case "manual" is the factor selection criterion used).
-manual_numb_factors_used = 15
+manual_numb_factors_used = 10
  
 # Please ENTER the rotation eventually used (e.g. "none", "varimax", "quatimax", "promax", "oblimin", "simplimax", and "cluster" - see help(principal)). Default is "varimax"
 rotation_used = "varimax"
@@ -206,7 +206,12 @@ rownames(Rotated_Factors_thres)<- rownames(Rotated_Factors)
  
 iprint.df(Rotated_Factors_thres, scale=TRUE)
 ```
- 
+
+To understand if there was any redundancy between factors (i.e. high correlation) we took a look at correlation between the rotated factors 
+```{r}
+factcor = round(cor(Rotated_Factors),2)
+iprint.df(round(factcor,2), scale=TRUE)
+```
  
 ## Step 6:  Save factor scores
  
