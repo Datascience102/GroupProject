@@ -15,11 +15,11 @@ output:
 always_allow_html: yes
 ---
  
-```{r setuplibraries, echo=TRUE, message=FALSE}
+```{r setuplibraries, echo=FALSE, message=FALSE}
 suppressWarnings(source("Library/library.R"))
-source("Library/heatmapOutput.R")
-source("Library/MartrixOperations.R")
-source("Library/allPublicLibraries.R")
+#source("Library/heatmapOutput.R")
+#source("Library/MartrixOperations.R")
+#source("Library/allPublicLibraries.R")
 # Package options
 suppressWarnings(ggthemr('fresh'))  # ggplot theme
 opts_knit$set(progress=FALSE, verbose=FALSE)
