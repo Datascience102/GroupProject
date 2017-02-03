@@ -27,25 +27,25 @@ opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.35, re
 options(knitr.kable.NA = '')
 ```
  
-#1) Context of the project
+#1) Context of the Project
+
 We are using a database with mobile telecommunication consumption data.
  
-The data belongs to a mobile telecom company that operates in Ghana, and our focus will be exclusively on customers who buy prepaid packages (similar to Starhub prepaid packages)
+The data belongs to a <b> mobile telecom company </b>that operates in an emerging market (name undisclosed to maintain confidentiality), and our focus will be exclusively on customers who buy prepaid packages (similar to Starhub prepaid packages)
  
-The company uses an old customer segmentation to design service packages (voice, roaming, data, etc) and to target sales initiatives. However, there is the perception that the segmentation is outdated and not working anymore as it should.
+The company uses an old customer segmentation to design service packages (voice, roaming, data, etc) and to target sales initiatives. However, there is the perception that <b> the segmentation is outdated and not working as effectively as it should.</b>
 <br>
  
-#2)         The business questions:
-The objective is to create a new segmentation based on data of customer usage of the different services, so the company can better offer and design the right packages to the right customer segments.
+#2) The Business Question
+
+The objective is to create a new segmentation based on data of customer usage of the different services, so the company can better offer and design the right packages to the right customer segments. Our project's aim is to create that segmentation by answering the following question.
  
-1) What are the main customer segments based on historical usage of the different services (voice, data, etc)?
+<b> What are the main customer segments based on historical usage of the different services (voice, data, etc)? </b>
  
  
+#3) The Data
  
- 
-#3)     The data
- 
-##3.1)   Treat and load the data
+##3.1)   Treat and Load the Data
  
 ```{r setupdata1E, echo=TRUE, tidy=TRUE}
 # Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. Do not add .csv at the end, make sure the data are numeric.
@@ -68,14 +68,12 @@ ProjectData_INITIAL <- ProjectData
  
 ```
  
-##3.2)   Describe the data
-(highlevel description of contents, # of rows, # of columns, list the columns and its meaning, show a sample of the data)
+##3.2) Describe the Data
+
+In this dataset, we have <b>`r nrow(ProjectData)` rows </b>and <b>`r ncol(ProjectData)` columns</b>. The rows indicate the number of customers we are dealing with in this sample and the columns describe those customers' usage pattern. 
  
  
- 
-#4)         PART 1: Factor/Component selection
- 
- 
+#4) PART 1: Factor/Component selection
  
 In this part we identify the underlying factors that best capture the behaviours on the various variables.
  
@@ -106,10 +104,11 @@ factor_attributes_used <- intersect(factor_attributes_used, 1:ncol(ProjectData))
 ProjectDataFactor <- ProjectData[1:nrow(ProjectData)-1,factor_attributes_used]
 ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
 ```
+
  
 ## Steps 1-2: Check the Data
  
-Start by some basic visual exploration of, say, a few data:
+We are going to start by doing some basic visual exploration of a few data:
  
 ```{r}
 rownames(ProjectDataFactor) <- paste0("Obs.", sprintf("%02i", 1:nrow(ProjectDataFactor)))
@@ -134,12 +133,11 @@ iprint.df(round(thecor,2), scale=TRUE)
  
 ## Step 4: Choose number of factors
  
-Clearly the survey asked many redundant questions (can you think some reasons why?), so we may be able to actually "group" these 29 attitude questions into only a few "key factors". This not only will simplify the data, but will also greatly facilitate our understanding of the customers.
+The dataset recorded all possible types of usage that can be made by a customer. The data allows us to understand the underlying behavior of the customer by doing a factor analysis. The factors will identify the behaviors of customers based on their usage pattern. 
  
-To do so, we use methods called [Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis) and [factor analysis](https://en.wikipedia.org/wiki/Factor_analysis) as also discussed in the [Dimensionality Reduction readings](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Sessions23/FactorAnalysisReading.html). We can use two different R commands for this (they make slightly different information easily available as output): the command `principal` (check `help(principal)` from R package [psych](http://personality-project.org/r/psych/)), and the command `PCA` from R package [FactoMineR](http://factominer.free.fr) - there are more packages and commands for this, as these methods are very widely used. 
- 
+
 ```{r}
-# Here is how the `principal` function is used
+# Principal Function
 UnRotated_Results<-principal(ProjectDataFactor, nfactors=ncol(ProjectDataFactor), rotate="none",score=TRUE)
 UnRotated_Factors<-round(UnRotated_Results$loadings,2)
 UnRotated_Factors<-as.data.frame(unclass(UnRotated_Factors))
@@ -147,7 +145,7 @@ colnames(UnRotated_Factors)<-paste("Comp",1:ncol(UnRotated_Factors),sep="")
 ```
  
 ```{r}
-# Here is how we use the `PCA` function
+# PCA Function
 Variance_Explained_Table_results<-PCA(ProjectDataFactor, graph=FALSE)
 Variance_Explained_Table<-Variance_Explained_Table_results$eig
 Variance_Explained_Table_copy<-Variance_Explained_Table
@@ -156,7 +154,7 @@ rownames(Variance_Explained_Table) <- paste("Component", 1:nrow(Variance_Explain
 colnames(Variance_Explained_Table) <- c("Eigenvalue", "Pct of explained variance", "Cumulative pct of explained variance")
 ```
  
-Let's look at the **variance explained** as well as the **eigenvalues** (see session readings):
+Let's look at the **variance explained** as well as the **eigenvalues** :
  
 ```{r}
 iprint.df(round(Variance_Explained_Table, 2), scale = FALSE)
@@ -171,7 +169,7 @@ iplot.df(melt(df, id="components"))
  
 ## Step 5: Interpret the factors
  
-Let's now see how the "top factors" look like.
+Let's now see how the factors look like:
  
 ```{r}
 if (factor_selectionciterion == "eigenvalue")
@@ -182,7 +180,7 @@ if (factor_selectionciterion == "manual")
   factors_selected = manual_numb_factors_used
 ```
  
-To better visualize them, we will use what is called a "rotation". There are many rotations methods. In this case we selected the `r rotation_used` rotation. For our data, the `r factors_selected` selected factors look as follows after this rotation:
+To better visualize them, we will use what is called a "rotation". In this case we selected the `r rotation_used` rotation. For our data, the `r factors_selected` selected factors look as follows after this rotation:
  
 ```{r}
 Rotated_Results<-principal(ProjectDataFactor, nfactors=max(factors_selected), rotate=rotation_used,score=TRUE)
@@ -215,7 +213,7 @@ iprint.df(round(factcor,2), scale=TRUE)
  
 ## Step 6:  Save factor scores
  
-We can now either replace all initial variables used in this part with the factors scores or just select one of the initial variables for each of the selected factors in order to represent that factor. Here is how the factor scores  are for the first few respondents:
+We can now either replace all initial variables used in this part with the factors scores or just select one of the initial variables for each of the selected factors in order to represent that factor. The factor scores look like the following for the first customers in our dataset:
  
 ```{r}
 NEW_ProjectData <- round(Rotated_Results$scores[1:nrow(Rotated_Results$scores)-1,1:factors_selected,drop=F],2)
