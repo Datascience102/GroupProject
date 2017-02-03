@@ -219,7 +219,7 @@ We can now either replace all initial variables used in this part with the facto
  
 ```{r}
 NEW_ProjectData <- round(Rotated_Results$scores[1:nrow(Rotated_Results$scores)-1,1:factors_selected,drop=F],2)
-colnames(NEW_ProjectData)<-paste("DV (Factor)",1:ncol(NEW_ProjectData),sep=" ")
+colnames(NEW_ProjectData)<-paste(c("Offnet Voice + SMS ( < 55%)", "Recharge", "Data Packages", "Out Roaming", "OG Intl Voice", "OG Offnet SMS + Intl IC SMS ( < 55%)", "Voice Package", "VAS Package","OG Intl SMS, SMS Package", "Pay-as-you-go Data", "OG SMS Onnet", "Content Provider VAS Package", "Blackberry Package", "Games", "IVR Shortcodes", "Onnet Voice OG", "IC Intl Voice", "OG Airtime Gifts", "Active Days", "IC Airtime Gifts"),1:ncol(NEW_ProjectData),sep=" ")
  
 iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
 ```
@@ -229,6 +229,8 @@ iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
  
 
 #5)         PART 2: Segmentation
+
+
 
 ```{r setupcluster, echo=TRUE, tidy=TRUE}
 
