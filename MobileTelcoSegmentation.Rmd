@@ -1,6 +1,6 @@
 ---
 title: "Mobile Telecom Segmentation"
-author: "Group Great"
+author: ""
 output:
   html_document:
     css: AnalyticsStyles/default.css
@@ -50,8 +50,6 @@ The objective is to create a new segmentation based on data of customer usage of
 ```{r setupdata1E, echo=TRUE, tidy=TRUE}
 # Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. Do not add .csv at the end, make sure the data are numeric.
 BDASmallTableClean = "Library/BDASmallTableNew.csv"
- 
-#>>>>>>> bfff9c1f85926b4164661820aa734f6312e97bf8 (WHAT IS THIS??)
  
 # Please enter the minimum number below which you would like not to print - this makes the readability of the tables easier. Default values are either 10e6 (to print everything) or 0.5. Try both to see the difference.
 MIN_VALUE = 0.5
@@ -194,7 +192,7 @@ Rotated_Factors <- Rotated_Factors[sorted_rows,]
 iprint.df(Rotated_Factors, scale=TRUE)
 ```
  
-To better visualize and interpret the factors we often "suppress" loadings with small values, e.g. with absolute values smaller than 0.5. In this case our factors look as follows after suppressing the small numbers:
+To better visualize and interpret the factors we "suppressed" loadings with small values, e.g. with absolute values smaller than 0.5. In this case our factors look as follows after suppressing the small numbers:
  
 ```{r}
 Rotated_Factors_thres <- Rotated_Factors
@@ -213,12 +211,12 @@ iprint.df(round(factcor,2), scale=TRUE)
  
 ## Step 6:  Save factor scores
  
-We can now either replace all initial variables used in this part with the factors scores or just select one of the initial variables for each of the selected factors in order to represent that factor. The factor scores look like the following for the first customers in our dataset:
+Now we replace all initial variables used in this part with the factors scores. The factor scores look like the following for the first customers in our dataset:
  
 ```{r}
 NEW_ProjectData <- round(Rotated_Results$scores[1:nrow(Rotated_Results$scores)-1,1:factors_selected,drop=F],2)
-colnames(NEW_ProjectData)<-paste(c("Offnet Voice + SMS ( < 55%)", "Recharge", "Data Packages", "Out Roaming", "OG Intl Voice", "OG Offnet SMS + Intl IC SMS ( < 55%)", "Voice Package", "VAS Package","OG Intl SMS, SMS Package", "Pay-as-you-go Data", "OG SMS Onnet", "Content Provider VAS Package", "Blackberry Package", "Games", "IVR Shortcodes", "Onnet Voice OG", "IC Intl Voice", "OG Airtime Gifts", "Active Days", "IC Airtime Gifts"),1:ncol(NEW_ProjectData),sep=" ")
- 
+colnames(NEW_ProjectData)<-paste(c("Offnet Voice + SMS ( < 55%)", "Recharge", "Data Packages", "Out Roaming", "OG Intl Voice", "OG Offnet SMS + Intl IC SMS ( < 55%)", "Voice Package", "VAS Package","OG Intl SMS", "SMS Package", "Pay-as-you-go Data", "OG SMS Onnet", "Content Provider VAS Package", "Blackberry Package", "Games", "IVR Shortcodes", "Onnet Voice OG", "IC Intl Voice", "OG Airtime Gifts", "Active Days", "IC Airtime Gifts"),1:ncol(NEW_ProjectData),sep=" ")
+
 iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
 ```
  
@@ -236,10 +234,10 @@ iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
 segmentation_attributes_used = c(28,25,27,14,20,8,3,12,13,5,9,11,2,30,24) #c(10,19,5,12,3) 
 
 # Please ENTER the number of clusters to eventually use for this report
-numb_clusters_used = 7 #Use this to "play" with the data until finding a suitable segmentation
+numb_clusters_used = 3 #Use this to "play" with the data until finding a suitable segmentation
 
 # Please enter the method to use for the segmentation:
-profile_with = "hclust" #"hclust" or "kmeans"
+profile_with = "kmeans" #"hclust" or "kmeans"
 
 # Please ENTER the distance metric eventually used for the clustering in case of hierarchical clustering 
 # (e.g. "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski" - see help(dist)). 
@@ -283,33 +281,19 @@ rownames(euclidean_pairwise) <- colnames(euclidean_pairwise) <- sprintf("Obs.%02
 
 iprint.df(round(euclidean_pairwise))
 ```
-<<<<<<< HEAD
 
 
-=======
- 
-We can see the histogram of, say, the first 2 variables
-
-```{r}
-variables_to_plot = 1:2
-do.call(iplot.grid, lapply(variables_to_plot, function(n){
-  iplot.hist(NEW_ProjectData[, n], breaks=5, xlab = paste("Variable", n))
-}))
-```
- 
->>>>>>> 8aa7b416b736fd0f9729206ec331b6d0bda85d48
- 
 ##Step 2: Segmentation and Robustness Analysis
  
 ###i.     Segmentation/Robustness Analysis
 
 
-We need to select the clustering method to use, as well as the number of clusters. It may be useful to see the dendrogram from Hierarchical Clustering of a sample of the factored data, to have a quick idea of how the data may be segmented and how many segments there may be. **Not that there is vector size limit to hclust method, thus we use a sample of, say, a 1000 observations**. 
+We need to select the clustering method to use, as well as the number of clusters. It may be useful to see the dendrogram from Hierarchical Clustering of a sample of the factored data, to have a quick idea of how the data may be segmented and how many segments there may be. **Note that there is vector size limit to hclust method, thus we use a sample of, say, a 500 observations**. 
 <br>
 Here is the dendrogram for our data:
 
 ```{r}
-Hierarchical_Cluster_distances <- dist(NEW_ProjectData[1:1000,], method=distance_used)
+Hierarchical_Cluster_distances <- dist(NEW_ProjectData[1:500,], method=distance_used)
 Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=hclust_method)
 # Display dendogram
 iplot.dendrogram(Hierarchical_Cluster)
@@ -317,9 +301,11 @@ iplot.dendrogram(Hierarchical_Cluster)
  #rect.hclust(Hierarchical_Cluster, k=numb_clusters_used, border="red") 
 ``` 
  
-We can also plot the "distances" traveled before we need to merge any of the lower and smaller in size clusters into larger ones - the heights of the tree branches that link the clusters as we traverse the tree from its leaves to its root. If we have n observations, this plot has n-1 numbers, we see the first 20 here. 
+We ploted the "distances" traveled before we need to merge any of the lower and smaller in size clusters into larger ones - the heights of the tree branches that link the clusters as we traverse the tree from its leaves to its root. <br>
+**Looking at the first 20, we can see that we can have either 4 or 9 clusters. **
+
 ```{r}
-num <- nrow(NEW_ProjectData[1:1000,]) - 1
+num <- nrow(NEW_ProjectData[1:500,]) - 1
 df1 <- cbind(as.data.frame(Hierarchical_Cluster$height[length(Hierarchical_Cluster$height):1]), c(1:num))
 colnames(df1) <- c("distances","index")
 iplot.df(melt(head(df1, 20), id="index"), xlab="Number of Components")
@@ -348,6 +334,73 @@ colnames(ProjectData_with_kmeans_membership)<-c("Observation Number","Cluster_Me
 iprint.df(round(head(ProjectData_with_kmeans_membership, max_data_report), 2))
 ```
  
-#c.          Step 3: Profile and interpret the above defined segments
+#Part 3: Profile and interpret the above defined segments
+
+Here we show how the *average* usage behaviour in each usage variable *in each segment* compare to the *average usage behaviour of the whole sample* using the ratio of the two.  
+
 <br>
-This is the final output. The list of segments and their definitions
+Here are the usage behaviour of the clusters found above and of the total sample for each of the factors:
+```{r}
+cluster_memberships_kmeans <- kmeans_clusters$cluster 
+cluster_ids_kmeans <- unique(cluster_memberships_kmeans)
+
+if (profile_with == "hclust"){
+  cluster_memberships <- cluster_memberships_hclust
+  cluster_ids <-  cluster_ids_hclust  
+}
+if (profile_with == "kmeans"){
+  cluster_memberships <- cluster_memberships_kmeans
+  cluster_ids <-  cluster_ids_kmeans
+}
+
+
+# WE WILL USE THESE IN THE CLASSIFICATION PART LATER
+NewData = matrix(cluster_memberships,ncol=1)
+
+population_average = matrix(apply(NEW_ProjectData, 2, median), ncol=1)
+colnames(population_average) <- "Population"
+Cluster_Profile_mean <- sapply(sort(cluster_ids), function(i) apply(NEW_ProjectData[(cluster_memberships==i), ], 2, median))
+if (ncol(NEW_ProjectData) <2)
+  Cluster_Profile_mean=t(Cluster_Profile_mean)
+colnames(Cluster_Profile_mean) <- paste("Seg.", 1:length(cluster_ids), sep="")
+cluster.profile <- cbind (population_average,Cluster_Profile_mean)
+
+iprint.df(round(cluster.profile, 2))
+```
+
+<br>
+We measure here the ratios of the average for each cluster to the average of the population, minus 1, (e.g. `avg(cluster)` `/` `avg(population)` `-1`) for each segment and variable for each factor.
+<br>
+The idea is that if in a segment the average usage behaviour is very different (e.g. away from ratio of 1) than the overall average, then that usage variable may indicate something about the segment relative to the total population.(e.g. if all segments are much like the overall population, there may be no segments). 
+
+```{r}
+population_average_matrix <- population_average[,"Population",drop=F] %*% matrix(rep(1,ncol(Cluster_Profile_mean)),nrow=1)
+Ratio_result <- Cluster_Profile_mean/population_average_matrix
+cluster_profile_ratios <- (ifelse(population_average_matrix==0, 0, ifelse(abs(Ratio_result)>=1, 1, Ratio_result)))
+
+colnames(cluster_profile_ratios) <- paste("Seg.", 1:ncol(cluster_profile_ratios), sep="")
+rownames(cluster_profile_ratios) <- colnames(NEW_ProjectData)
+## printing the result in a clean-slate table
+iprint.df(round(cluster_profile_ratios-1, 2))
+```
+
+<br>
+There are 3 segments:
+<br>
+<br>
+**Segment Enterprise**
+<br>
+Strong in several services that enterprise clients use: offnet and international SMS, voice packages, value added services (VAS) packages, IVR short code (shorter number, with less digits), on Net voice and international voice
+<br>
+<br>
+**Segment Short-term client**
+<br>
+Active for less than 20 days
+<br>
+<br>
+**Segment Family abroad**
+<br>
+Strong in out roaming and on airtime (credit) gifts
+
+<br>
+
