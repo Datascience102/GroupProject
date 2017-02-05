@@ -27,25 +27,34 @@ opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.35, re
 options(knitr.kable.NA = '')
 ```
  
-#1) Context of the Project
+# Context of the Project
 
-We are using a database with mobile telecommunication consumption data.
- 
-The data belongs to a <b> mobile telecom company </b>that operates in an emerging market (name undisclosed to maintain confidentiality), and our focus will be exclusively on customers who buy prepaid packages (similar to Starhub prepaid packages)
- 
-The company uses an old customer segmentation to design service packages (voice, roaming, data, etc) and to target sales initiatives. However, there is the perception that <b> the segmentation is outdated and not working as effectively as it should.</b>
-<br>
- 
-#2) The Business Question
+Customer segmentation is critical to the success of any company, most especially large ones that serve multiple segments. Without adequate segmentation, companies waste resources pushing products to the wrong set of customers. For our project, we are helping a company to properly segment its customer base in order to improve targeted communication, as well as top and bottom-line performance. 
 
-The objective is to create a new segmentation based on data of customer usage of the different services, so the company can better offer and design the right packages to the right customer segments. Our project's aim is to create that segmentation by answering the following question.
+The client is a mobile telecom operator whose core business is in the B2C prepaid business. Thus our focus will be exclusively on customers who buy prepaid packages (Similar to Starhub prepaid packages). 
+Presently, the client uses outdated customer segmentation to design service packages and target the relevant customers with appropriate communication. In recent times, the company has observed its segmentation is obsolete as the results of campaigns yield limited, if any, results. Our goal is to redefine the customer segments to better reflect the company’s business reality.
+Given that the data belongs to a real telecom operator (name withheld to maintain confidentiality) which works in a highly competitive market, segmentation profiling data is withheld to preserve the anonymity of the company; focus of the segmentation will be consumption (usage) data.
+ 
+# The Business Question
+
+The objective is to create a new segmentation based on data of customer usage of the different services, so the company can better design and target the right customers with the right packages. Our project's aim is to create that segmentation by answering the following question.
  
 <b> What are the main customer segments based on historical usage of the different services (voice, data, etc)? </b>
  
  
-#3) The Data
+# Data Loading & Treatment
  
-##3.1)   Treat and Load the Data
+##1)   Treat and Load the Data
+ The team received multiple raw data dump files from the client containing usage and profiling data. Data treatment involved:
+<ul><b>a.</b>	merging files using common attributes (customer phone number),</ul> 
+<ul><b>b.</b>	masking of confidential data that was essential to the segmentation process (e.g. customer phone number)</ul>
+<ul><b>c.</b>	removal of other confidential data fields that were not essential </ul>
+<ul><b>d.</b>	renaming columns to mask operator identity </ul>
+<ul><b>e.</b>	conversion of all fields to numeric format </ul>
+<ul><b>f.</b>	slicing file into chunks and selection of a chunk for segmentation (given the size of the original data file) </ul>
+
+The resulting file was used throughout the segmentation process, which is outlined in the coming paragraphs
+
  
 ```{r setupdata1E, echo=TRUE, tidy=TRUE}
 # Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. Do not add .csv at the end, make sure the data are numeric.
@@ -66,14 +75,24 @@ ProjectData_INITIAL <- ProjectData
  
 ```
  
-##3.2) Describe the Data
+##2) Describe the Data
 
-In this dataset, we have <b>`r nrow(ProjectData)` rows </b>and <b>`r ncol(ProjectData)` columns</b>. The rows indicate the number of customers we are dealing with in this sample and the columns describe those customers' usage pattern. 
+In this dataset, we have <b>`r nrow(ProjectData)` rows</b> and <b>`r ncol(ProjectData)` columns </b>. The rows indicate the number of customers we are dealing with in this sample and the columns describe those customers' usage pattern. 
+<ul>Onnet: Local call to another customer on the same network </ul>
+<ul>Offnet: Call to a customer on another local network </ul>
+<ul>Intl: Call to another customer in a different country </ul>
+<ul>OG (Outgoing): Activity initiated by customer </ul>
+<ul>IC (Incoming): Activity received by customer </ul>
+<ul>Data: Internet </ul>
+<ul>MOU (Minutes of Usage): Measurement of voice usage in minutes </ul>
+<ul>MB (megabytes): Measurement of data usage </ul>
+<ul>Inroaming: Customer from another country and network who roams on your network </ul>
+<ul>Outroaming: Customer from your network who travels to a foreign country and roams on a foreign network </ul>
+
  
+#Factor Analysis & Component selection
  
-#4) PART 1: Factor/Component selection
- 
-In this part we identify the underlying factors that best capture the behaviours on the various variables.
+In this part we identify the underlying factors that best capture the behaviours of the various variables. We use dimensionality reduction techniques to reduce the many columns into a smaller number of factors that captured at least 80% of the variance within the dataset
  
 ```{r setupfactor, echo=TRUE, tidy=TRUE}
 # Please ENTER the original raw attributes to use.
@@ -164,7 +183,9 @@ df           <- cbind(as.data.frame(eigenvalues), c(1:length(eigenvalues)), rep(
 colnames(df) <- c("eigenvalues", "components", "abline")
 iplot.df(melt(df, id="components"))
 ```
- 
+
+Based on the outcome of the factor analysis, we chose to move ahead with the 1st 21 factors, which explained more than 80% of the data. 
+
 ## Step 5: Interpret the factors
  
 Let's now see how the factors look like:
@@ -211,7 +232,7 @@ iprint.df(round(factcor,2), scale=TRUE)
  
 ## Step 6:  Save factor scores
  
-Now we replace all initial variables used in this part with the factors scores. The factor scores look like the following for the first customers in our dataset:
+Now we replace all initial variables used in this part with the factors scores, renaming the columns to reflect the new meanings of the factors we derived. The factor scores look like the following for the first customers in our dataset:
  
 ```{r}
 NEW_ProjectData <- round(Rotated_Results$scores[1:nrow(Rotated_Results$scores)-1,1:factors_selected,drop=F],2)
@@ -224,14 +245,14 @@ iprint.df(t(head(NEW_ProjectData, 10)), scale=TRUE)
 <hr>\clearpage
  
 
-#5)         PART 2: Segmentation
+#Segmentation - Clustering Analysis & Segment Description
 
-
+Now that we had decided on what factors to use as basis for segmentation, we proceeded to cluster the observations and derived, finally, 3 segments. 
 
 ```{r setupcluster, echo=TRUE, tidy=TRUE}
 # Please ENTER then original raw attributes to use for the segmentation (the "segmentation attributes")
 # Please use numbers, not column names, e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
-segmentation_attributes_used = c(28,25,27,14,20,8,3,12,13,5,9,11,2,30,24) #c(10,19,5,12,3) 
+segmentation_attributes_used = NEW_ProjectData[1:21] #c(10,19,5,12,3) 
 
 # Please ENTER the number of clusters to eventually use for this report
 numb_clusters_used = 3 #Use this to "play" with the data until finding a suitable segmentation
@@ -285,8 +306,6 @@ iprint.df(round(euclidean_pairwise))
 
 ##Step 2: Segmentation and Robustness Analysis
  
-###i.     Segmentation/Robustness Analysis
-
 
 We need to select the clustering method to use, as well as the number of clusters. It may be useful to see the dendrogram from Hierarchical Clustering of a sample of the factored data, to have a quick idea of how the data may be segmented and how many segments there may be. **Note that there is vector size limit to hclust method, thus we use a sample of, say, a 500 observations**. 
 <br>
@@ -376,11 +395,13 @@ The idea is that if in a segment the average usage behaviour is very different (
 ```{r}
 population_average_matrix <- population_average[,"Population",drop=F] %*% matrix(rep(1,ncol(Cluster_Profile_mean)),nrow=1)
 Ratio_result <- Cluster_Profile_mean/population_average_matrix
-cluster_profile_ratios <- (ifelse(population_average_matrix==0, 0, ifelse(abs(Ratio_result)>=1, 1, Ratio_result)))
+cluster_profile_ratios2 <- (ifelse(population_average_matrix==0, 0, ifelse(abs(Ratio_result)>=1, 1, Ratio_result)))
 
-colnames(cluster_profile_ratios) <- paste("Seg.", 1:ncol(cluster_profile_ratios), sep="")
-rownames(cluster_profile_ratios) <- colnames(NEW_ProjectData)
+colnames(cluster_profile_ratios2) <- paste("Seg.", 1:ncol(cluster_profile_ratios), sep="")
+rownames(cluster_profile_ratios2) <- colnames(NEW_ProjectData)
+
 ## printing the result in a clean-slate table
+
 iprint.df(round(cluster_profile_ratios-1, 2))
 ```
 
@@ -390,17 +411,17 @@ There are 3 segments:
 <br>
 **Segment Enterprise**
 <br>
-Strong in several services that enterprise clients use: offnet and international SMS, voice packages, value added services (VAS) packages, IVR short code (shorter number, with less digits), on Net voice and international voice
+Strong in several services that enterprise clients use: offnet and international SMS, voice packages, value added services (VAS) packages, IVR short code (shorter number, with less digits), onnet voice and international voice
 <br>
 <br>
 **Segment Short-term client**
 <br>
-Active for less than 20 days
+These customers' key trait was their lower number of active days per month, suggesting that they use the client's network as a secondary option. 
 <br>
 <br>
 **Segment Family abroad**
 <br>
-Strong in out roaming and on airtime (credit) gifts
+These customers are focused on international dialling, showing also strong outroaming usage - these customers travel abraod and may have high value. However, their data usage is quite low, reinforcing the sense that they are voice, and not data customers. 
 
 <br>
 
